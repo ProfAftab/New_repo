@@ -13,11 +13,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Inspect Workspace Files
-        run: |
-          echo "Files in GitHub runner root:"
-          ls -la
-
       - name: Configure SSH Key
         run: |
           mkdir -p ~/.ssh
@@ -25,13 +20,9 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Verify EC2 Connection and Remote rsync
-        run: |
-          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "which rsync && sudo mkdir -p /var/www/html && sudo chown -R deploy:apache /var/www/html"
-
       - name: Sync Static Files to /var/www/html
         run: |
-          rsync -avzvv --delete \
+          rsync -avz --delete \
             --exclude '.git*' \
             --exclude '.github' \
             ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/var/www/html/
